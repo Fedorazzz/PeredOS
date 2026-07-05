@@ -1,0 +1,70 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          peredos-firstboot
+# Required-Start:    $local_fs $network
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-Description: ПередОС — первоначальная настройка
+# Description:       Настройка системы при первой загрузке
+### END INIT INFO
+
+set -e
+
+PEREDOS_LOG="/var/log/peredos-firstboot.log"
+FLAG_FILE="/var/lib/peredos/firstboot-done"
+
+log_msg() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$PEREDOS_LOG"
+}
+
+# Проверяем, не выполнялась ли уже настройка
+if [ -f "$FLAG_FILE" ]; then
+    exit 0
+fi
+
+log_msg "═══════════════════════════════════════"
+log_msg "  ПередОС — Первоначальная настройка"
+log_msg "═══════════════════════════════════════"
+
+# Создание флага
+mkdir -p "$(dirname "$FLAG_FILE")"
+
+# Настройка SELinux
+log_msg "Настройка SELinux..."
+if [ -f /etc/selinux/config ]; then
+    setenforce 1 2>/dev/null || true
+    log_msg "SELinux активирован"
+fi
+
+# Настройка фаервола
+log_msg "Настройка межсетевого экрана..."
+if command -v firewall-cmd &> /dev/null; then
+    systemctl enable firewalld
+    systemctl start firewalld
+    firewall-cmd --set-default-zone=public
+    firewall-cmd --permanent --add-service=ssh
+    firewall-cmd --reload
+    log_msg "Firewalld настроен"
+fi
+
+# Оптимизация Btrfs
+log_msg "Оптимизация файловой системы..."
+if mount | grep -q "btrfs"; then
+    btrfs filesystem defragment -r / 2>/dev/null || true
+    log_msg "Btrfs оптимизирована"
+fi
+
+# Настройка Flatpak
+log_msg "Настройка Flatpak..."
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
+log_msg "Flatpak настроен"
+
+# Приветственное сообщение
+log_msg "Настройка завершена!"
+log_msg "Добро пожаловать в ПередОС!"
+
+# Создание флага завершения
+touch "$FLAG_FILE"
+
+exit 0

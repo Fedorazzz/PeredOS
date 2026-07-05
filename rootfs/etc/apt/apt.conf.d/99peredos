@@ -1,0 +1,24 @@
+// ПередОС — настройки APT
+
+// Использовать сжатие для пакетов
+Acquire::CompressionTypes::Order:: "gz";
+Acquire::CompressionTypes::Order:: "xz";
+
+// Параллельная загрузка
+Acquire::Queue-Mode "access";
+Acquire::Retries "3";
+
+// Автоматическая очистка кэша
+APT::Periodic::AutocleanInterval "7";
+
+// Не устанавливать рекомендуемые пакеты автоматически
+APT::Install-Recommends "false";
+APT::Install-Suggests "false";
+
+// Показывать прогресс
+Dpkg::Progress-Fancy "1";
+APT::Color "true";
+
+// Безопасность: проверять подписи
+Acquire::AllowInsecureRepositories "false";
+Acquire::AllowDowngradeToInsecureRepositories "false";

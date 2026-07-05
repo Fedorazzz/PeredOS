@@ -1,0 +1,15 @@
+PRETTY_NAME="ПередОС 1.0 (Pioneer)"
+NAME="ПередОС"
+VERSION_ID="1.0"
+VERSION="1.0 (Pioneer)"
+ID=peredos
+ID_LIKE=debian
+HOME_URL="https://peredos.vsepo.ru"
+SUPPORT_URL="https://support.vsepo.ru"
+BUG_REPORT_URL="https://bugs.vsepo.ru"
+PRIVACY_POLICY_URL="https://peredos.vsepo.ru/privacy"
+VERSION_CODENAME=pioneer
+UBUNTU_CODENAME=pioneer
+DOCUMENTATION_URL="https://docs.peredos.vsepo.ru"
+LOGO=peredos-logo
+ANSI_COLOR="0;38;2;6;182;212"

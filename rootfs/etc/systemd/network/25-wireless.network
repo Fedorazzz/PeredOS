@@ -1,0 +1,14 @@
+[Match]
+Name=wl*
+Name=wlan*
+
+[Network]
+DHCP=yes
+MulticastDNS=yes
+IgnoreCarrierLoss=3s
+
+[DHCPv4]
+RouteMetric=200
+
+[IPv6AcceptRA]
+RouteMetric=200

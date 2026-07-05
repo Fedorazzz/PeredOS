@@ -1,0 +1,17 @@
+# ПередОС — файл системных таблиц
+# <file system>                           <mount point>   <type>  <options>                        <dump>  <pass>
+
+# Корневая файловая система (Btrfs)
+UUID=ROOT_UUID    /           btrfs   defaults,noatime,compress=zstd:3,subvol=@           0       1
+
+# Домашний раздел (Btrfs)
+UUID=HOME_UUID    /home       btrfs   defaults,noatime,compress=zstd:3,subvol=@home       0       2
+
+# Загрузочный раздел (EFI)
+UUID=BOOT_UUID    /boot/efi   vfat    defaults,noatime,umask=0077                         0       2
+
+# Временные файлы в RAM
+tmpfs             /tmp        tmpfs   defaults,noatime,nosuid,nodev,size=2G               0       0
+
+# ОЗУ для логов (ограничено)
+tmpfs             /var/log    tmpfs   defaults,noatime,nosuid,nodev,size=500M             0       0

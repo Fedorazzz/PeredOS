@@ -1,0 +1,31 @@
+# ПередОС — настройки GRUB
+
+# Имя дистрибутива
+GRUB_DISTRIBUTOR="ПередОС"
+
+# Таймаут
+GRUB_TIMEOUT=5
+GRUB_TIMEOUT_STYLE=menu
+
+# Внешний вид
+GRUB_BACKGROUND="/usr/share/backgrounds/peredos/default-dark.jpg"
+GRUB_GFXMODE=auto
+GRUB_GFXPAYLOAD_LINUX=keep
+
+# Цвета
+GRUB_COLOR_NORMAL="cyan/blue"
+GRUB_COLOR_HIGHLIGHT="white/blue"
+
+# Параметры ядра
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+GRUB_CMDLINE_LINUX=""
+
+# Безопасность
+GRUB_DISABLE_RECOVERY="false"
+GRUB_DISABLE_OS_PROBER=false
+
+# Разрешение консоли
+GRUB_TERMINAL=gfxterm
+
+# Тема (если установлена)
+GRUB_THEME="/boot/grub/themes/peredos/theme.txt"
