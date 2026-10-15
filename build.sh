@@ -119,6 +119,7 @@ chroot_mount() {
     mountpoint -q "${CHROOT}/dev" || mount --bind /dev "${CHROOT}/dev"
     mountpoint -q "${CHROOT}/dev/pts" || mount -t devpts devpts "${CHROOT}/dev/pts"
     # DNS внутри chroot
+    rm -f "${CHROOT}/etc/resolv.conf"
     cp -L /etc/resolv.conf "${CHROOT}/etc/resolv.conf"
 }
 
