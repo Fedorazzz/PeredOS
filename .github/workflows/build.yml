@@ -1,0 +1,35 @@
+name: Build ISO
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['build.sh', 'rootfs/**', 'branding/**', '.github/workflows/build.yml']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache
+          df -h /
+
+      - name: Build ISO
+        env:
+          PEREDOS_PASSWORD: ${{ secrets.PEREDOS_PASSWORD }}
+        run: sudo -E ./build.sh
+
+      - name: Checksums
+        run: cd build && sha256sum *.iso | tee SHA256SUMS
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: peredos-iso
+          path: |
+            build/*.iso
+            build/SHA256SUMS
+          if-no-files-found: error
