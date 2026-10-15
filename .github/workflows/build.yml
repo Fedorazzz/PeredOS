@@ -24,7 +24,7 @@ jobs:
         run: sudo -E bash ./build.sh
 
       - name: Checksums
-        run: cd build && sha256sum *.iso | tee SHA256SUMS
+        run: cd build && sudo sh -c "sha256sum *.iso > SHA256SUMS" && cat SHA256SUMS
 
       - uses: actions/upload-artifact@v4
         with:
