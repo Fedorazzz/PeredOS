@@ -22,10 +22,12 @@ GRUB_CMDLINE_LINUX=""
 
 # Безопасность
 GRUB_DISABLE_RECOVERY="false"
+# Искать другие ОС (для dual-boot)
 GRUB_DISABLE_OS_PROBER=false
 
 # Разрешение консоли
 GRUB_TERMINAL=gfxterm
 
-# Тема (если установлена)
-GRUB_THEME="/boot/grub/themes/peredos/theme.txt"
+# Тема GRUB пока не поставляется. Когда появится /boot/grub/themes/peredos,
+# раскомментируйте строку (с темой GRUB_BACKGROUND и цвета не используются):
+#GRUB_THEME="/boot/grub/themes/peredos/theme.txt"

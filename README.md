@@ -6,12 +6,14 @@
 
 ## Описание
 
-**ПередОС** — это современная Linux-система, построенная на базе Debian 12 (Bookworm) с ядром Linux 6.8 LTS. ОС разработана с фокусом на максимальную безопасность, высокую производительность и современный минималистичный дизайн.
+**ПередОС** — это современная Linux-система, построенная на базе Debian 12 (Bookworm) с ядром Linux 6.1 LTS и рабочим столом GNOME 43. ОС разработана с фокусом на безопасность, производительность и минималистичный дизайн.
+
+> **Статус:** прототип. Сейчас собирается live-образ для amd64 (UEFI и BIOS). Установщика, собственных пакетов и темы GRUB пока нет.
 
 ### Уникальные технологии
 
-- **ПередЗащита** — многоуровневая система безопасности (SELinux, LUKS2, Flatpak)
-- **ПередСкорость** — оптимизация загрузки < 10 секунд (Btrfs, zstd, оптимизированный scheduler)
+- **ПередЗащита** — firewalld, fail2ban, auditd, Flatpak; SELinux установлен, но не активирован
+- **ПередСкорость** — настройки sysctl (BBR, swappiness), Btrfs с zstd в шаблоне fstab
 - **ПередДизайн** — современный интерфейс GNOME с адаптивными темами
 - **ПередЦентр** — единый центр управления системой
 
@@ -31,15 +33,14 @@ peredos/
 │   ├── etc/
 │   │   ├── apt/          # Настройки репозиториев
 │   │   ├── default/grub  # Конфигурация загрузчика
-│   │   ├── fstab         # Таблица файловых систем
+│   │   ├── fstab         # Шаблон fstab для установщика (в live не копируется)
 │   │   ├── hostname      # Имя хоста
+│   │   ├── modules-load.d/ # Загрузка модуля tcp_bbr
 │   │   ├── os-release    # Информация об ОС
-│   │   ├── sysctl.d/     # Оптимизации ядра
-│   │   ├── systemd/      # Настройки systemd
-│   │   └── ...
-│   └── ...
-├── iso/                  # Файлы для ISO образа
-└── kernel/               # Конфигурации ядра
+│   │   ├── sysctl.d/     # Настройки ядра
+│   │   └── systemd/      # resolved, timesyncd, peredos-firstboot.service
+│   └── usr/lib/peredos/  # firstboot — скрипт первой загрузки
+└── build/                # Результат сборки (в git не попадает)
 ```
 
 ## Системные требования
@@ -54,7 +55,7 @@ peredos/
 
 ### Требования
 
-- Debian/Ubuntu-based система
+- Debian/Ubuntu-based система на x86_64
 - Права root (sudo)
 - Интернет-соединение
 - ~10 GB свободного места
@@ -63,16 +64,16 @@ peredos/
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y debootstrap grub-pc-bin grub-efi-amd64-bin \
-    xorriso squashfs-tools systemd-container binutils
+sudo apt-get install -y debootstrap grub-pc-bin grub-efi-amd64-bin grub-common \
+    xorriso mtools squashfs-tools
 ```
 
 ### Запуск сборки
 
 ```bash
-# Полная сборка
+# Полная сборка (пароль пользователя user задаётся переменной)
 cd peredos
-sudo ./build.sh
+sudo PEREDOS_PASSWORD='ваш_пароль' ./build.sh
 
 # Только определённый этап
 sudo ./build.sh --stage 1  # Базовая система
@@ -81,10 +82,13 @@ sudo ./build.sh --stage 3  # Пакеты
 sudo ./build.sh --stage 4  # Брендинг
 sudo ./build.sh --stage 5  # Initramfs
 sudo ./build.sh --stage 6  # ISO
+sudo ./build.sh --stage 7  # Очистка монтирований
 
 # Очистка
 sudo ./build.sh --clean
 ```
+
+Репозиторий `repo.peredos.vsepo.ru` подключается только при наличии ключа `branding/peredos-archive-keyring.gpg` (или пути из `PEREDOS_REPO_KEY`).
 
 Результат сборки: `build/peredos-1.0-pioneer-amd64.iso`
 
@@ -100,23 +104,22 @@ sudo dd if=peredos-1.0-pioneer-amd64.iso of=/dev/sdX bs=4M status=progress
 # Просто скопируйте ISO на флешку с Ventoy
 ```
 
-### Процесс установки
+### Запуск
 
-1. Загрузитесь с USB накопителя
-2. Выберите "Запустить ПередОС 1.0 (Pioneer)"
-3. Следуйте инструкциям установщика
-4. Перезагрузитесь в новую систему
+1. Загрузитесь с USB-накопителя.
+2. Выберите пункт меню ПередОС. Система стартует в live-режиме, пользователь `user` входит автоматически.
+3. Установщика пока нет. Шаблон разметки лежит в `/usr/share/peredos/fstab.template`.
 
 ## Технический стек
 
-- **Ядро:** Linux 6.8 LTS (x86_64, ARM64, RISC-V)
+- **Ядро:** Linux 6.1 LTS из Debian 12 (только x86_64)
 - **База:** Debian 12 Bookworm
-- **Инициализация:** Systemd
-- **Графика:** Wayland + Mutter (GNOME 45)
+- **Инициализация:** systemd
+- **Графика:** GNOME 43, Wayland/Xorg через GDM
 - **Аудио/Видео:** PipeWire
-- **ФС:** Btrfs с zstd сжатием
-- **Безопасность:** SELinux + LUKS2 + Flatpak
-- **Сеть:** NetworkManager + iwd
+- **ФС:** Btrfs с zstd (шаблон fstab); live-образ — SquashFS
+- **Безопасность:** firewalld, fail2ban, auditd, Flatpak, SELinux (пакеты установлены, не активирован)
+- **Сеть:** NetworkManager + systemd-resolved (DNS-over-TLS в режиме opportunistic)
 
 ## Лицензия
 

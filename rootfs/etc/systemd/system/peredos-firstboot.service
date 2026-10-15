@@ -1,0 +1,13 @@
+[Unit]
+Description=ПередОС — первоначальная настройка
+After=network-online.target firewalld.service
+Wants=network-online.target
+ConditionPathExists=!/var/lib/peredos/firstboot-done
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/peredos/firstboot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

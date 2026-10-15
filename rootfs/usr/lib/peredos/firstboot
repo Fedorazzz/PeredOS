@@ -1,0 +1,36 @@
+#!/bin/bash
+# ПередОС — первоначальная настройка (запускается peredos-firstboot.service)
+set -u
+
+LOG="/var/log/peredos-firstboot.log"
+FLAG="/var/lib/peredos/firstboot-done"
+
+log_msg() { echo "[$(date '+%F %T')] $1" | tee -a "$LOG"; }
+
+[[ -f "$FLAG" ]] && exit 0
+mkdir -p "$(dirname "$FLAG")"
+
+log_msg "ПередОС: первоначальная настройка"
+
+# Межсетевой экран: зона public разрешает ssh и dhcpv6-client по умолчанию
+if command -v firewall-cmd &> /dev/null; then
+    if firewall-cmd --set-default-zone=public &>> "$LOG"; then
+        log_msg "firewalld: зона по умолчанию — public"
+    else
+        log_msg "firewalld: не удалось настроить (служба не запущена?)"
+    fi
+fi
+
+# Flathub нужен сеть; без неё не ставим флаг, и попытка повторится при следующей загрузке
+if command -v flatpak &> /dev/null; then
+    if flatpak remote-add --system --if-not-exists flathub \
+        https://flathub.org/repo/flathub.flatpakrepo &>> "$LOG"; then
+        log_msg "Flathub добавлен"
+    else
+        log_msg "Flathub: нет сети, повторим при следующей загрузке"
+        exit 0
+    fi
+fi
+
+touch "$FLAG"
+log_msg "Настройка завершена"
